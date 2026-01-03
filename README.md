@@ -16,7 +16,8 @@
 Java-practice/
 ├── src/
 │   ├── chapter3/       # Fundamentals (Variables, Arrays, Control Flow)
-│   ├── chapter4/       # Objects & Classes (예정)
+│   ├── chapter4/       # Objects & Classes
+|   ├── chapter5/       # 예정
 │   └── ...
 ├── README.md           # Project Documentation
 └── .gitignore          # Git configuration
