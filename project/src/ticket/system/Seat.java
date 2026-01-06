@@ -1,3 +1,5 @@
+package ticket.system;
+
 class Seat {
     private boolean isBooked;
     private String reserverName;

@@ -1,3 +1,5 @@
+package ticket.system;
+
 class ConcertHall {
     int row_n=10, col_n=10;
     Seat[][] seats;
@@ -6,7 +8,7 @@ class ConcertHall {
         seats = new Seat[row_n][col_n];
         for (int i = 0; i < row_n; i++) {
             for (int j = 0; j < col_n; j++) {
-                seats[i][j] = new Seat();    // 여기서 Seat 객체 생성
+                seats[i][j] = new Seat();    // 여기서 ticket.system.Seat 객체 생성
             }
         }
     }
