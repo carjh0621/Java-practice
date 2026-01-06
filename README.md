@@ -14,10 +14,10 @@
 
 ```text
 Java-practice/
-├── src/
-│   ├── chapter3/       # Fundamentals (Variables, Arrays, Control Flow)
-│   ├── chapter4/       # Objects & Classes
-|   ├── chapter5/       # 예정
-│   └── ...
+├── chapter3/       # Fundamentals (Variables, Arrays, Control Flow)
+├── chapter4/       # Objects & Classes
+├── chapter5/       # 예정
+├── ...
+├── ticket/system   # Java 실습
 ├── README.md           # Project Documentation
 └── .gitignore          # Git configuration
