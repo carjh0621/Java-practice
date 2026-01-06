@@ -1,4 +1,4 @@
 Manifest-Version: 1.0
-Main-Class: HelloJar
+ticket.system.Main-Class: HelloJar
 Created-By: MyName
 
