@@ -47,7 +47,7 @@ class ConcertHall {
     }
 
     public void cancelSeat(int r, int c, String name){
-        if(r>row_n || r<0 || c>=col_n || c<0)
+        if(r>=row_n || r<0 || c>=col_n || c<0)
             System.out.println("out of index, cancel fail");
         else if (!seats[r][c].isBooked()) {
             System.out.println("this seat is not booked, cancel fail");
