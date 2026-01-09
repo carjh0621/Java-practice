@@ -11,7 +11,7 @@ public class AbstractClassTest {
         people[1] = new Student("Maria Morris", "Computer Science");
 
         //공통 메서드 호출
-        // p.getDescription() 호출 시, 실제 객체(Employee, Student)의 메서드가 실행됨
+        // p.getDescription() 호출 시, 실제 객체(reflectexample.Employee, Student)의 메서드가 실행됨
         for (Person p : people) {
             System.out.println(p.getName() + ", " + p.getDescription());
         }

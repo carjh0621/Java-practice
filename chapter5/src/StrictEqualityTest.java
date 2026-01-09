@@ -8,7 +8,7 @@ public class StrictEqualityTest {
 
         System.out.println("=== getClass() 사용 (엄격한 비교) ===");
 
-        // 1. Employee vs Manager 비교
+        // 1. reflectexample.Employee vs reflectexample.Manager 비교
         // 내용은 같지만 클래스가 다르므로 false가 나와야 정상 (대칭성 확보)
         System.out.println("alice.equals(aliceMgr): " + alice.equals(aliceMgr));
         System.out.println("aliceMgr.equals(alice): " + aliceMgr.equals(alice));
