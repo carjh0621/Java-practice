@@ -1,5 +1,7 @@
 package ticket.system;
 
+
+
 class ConcertHall {
     int row_n=10, col_n=10;
     Seat[][] seats;
@@ -8,14 +10,21 @@ class ConcertHall {
         seats = new Seat[row_n][col_n];
         for (int i = 0; i < row_n; i++) {
             for (int j = 0; j < col_n; j++) {
-                seats[i][j] = new Seat();    // 여기서 ticket.system.Seat 객체 생성
+                if (i<2){
+                    seats[i][j] = new VIPSeat(); // 앞의 두 행은 vip 좌석
+                }
+                else {
+                    seats[i][j] = new Seat();    // 여기서 ticket.system.Seat 객체 생성
+                }
             }
         }
     }
 
     public void showSeats(){
         //x: booked o: available
-        System.out.println("x: booked, o: available");
+        System.out.println("x: booked, o: available, V: vip seat(currently available)");
+        System.out.println("first two rows are vip seats");
+        System.out.println("regular seat: 10000원, vip seat: 20000원");
         System.out.print("  ");
         for(int i=0;i<col_n;i++){
             System.out.print(" "+i+" ");
@@ -24,10 +33,12 @@ class ConcertHall {
             System.out.print(i+" ");
             for(int j=0;j<col_n;j++){
                 boolean cur_book_info = seats[i][j].isBooked();
-                if(cur_book_info)
-                    System.out.print("[x]");
+                if(!cur_book_info)
+                    //System.out.print("[x]");
+                    System.out.print(seats[i][j].getSymbol());
+                    //getClass 사용에서 override 활용으로
                 else
-                    System.out.print("[o]");
+                    System.out.print("[x]");
             }
             System.out.println();
         }
@@ -39,8 +50,11 @@ class ConcertHall {
         else if (seats[r][c].isBooked())
             System.out.println("this seat is already booked, reserve fail");
         else{
-            if(seats[r][c].book(name)==1)
+            if(seats[r][c].book(name)==1) {
                 System.out.println("reserve success");
+                int price = seats[r][c].getPrice();
+                System.out.println("price: "+ price +"원");
+            }
             else
                 System.out.println("reserve fail");
         }

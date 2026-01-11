@@ -26,8 +26,9 @@ class Seat {
             this.isBooked=false;
             return 1;
         }
-
     }
+
+    public int getPrice() { return 10000; }
 
     public boolean isBooked(){
         return isBooked;
@@ -37,5 +38,24 @@ class Seat {
         return this.reserverName.equals(name);
     }
 
+    public String getSymbol(){ return "[o]";}
+}
+
+
+class VIPSeat extends Seat {
+
+    @Override
+    public int getPrice(){
+        return 20000;
+    }
+
+    @Override
+    public String getSymbol() {
+        return "[V]";
+    }
+
+    public VIPSeat(){
+        super();
+    }
 
 }
