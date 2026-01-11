@@ -17,7 +17,8 @@ AI를 활용하여 챕터별 예제코드를 통해 사용법과 개념을 확�
 Java-practice/
 ├── chapter3/       # Fundamentals (Variables, Arrays, Control Flow)
 ├── chapter4/       # Objects & Classes
-├── chapter5/       # 예정
+├── chapter5/       # Inheritance
+├── chapter6/       # 예정
 ├── ...
 ├── ticket/system   # Java 실습
 ├── README.md           # Project Documentation
