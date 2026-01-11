@@ -18,7 +18,7 @@ Java-practice/
 ├── chapter3/       # Fundamentals (Variables, Arrays, Control Flow)
 ├── chapter4/       # Objects & Classes
 ├── chapter5/       # Inheritance
-├── chapter6/       # 예정
+├── chapter6/       # 예정 
 ├── ...
 ├── ticket/system   # Java 실습
 ├── README.md           # Project Documentation
