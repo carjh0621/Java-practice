@@ -1,7 +1,11 @@
 package ticket;
 
+import ticket.interfaces.Payable;
 import ticket.model.User;
+import ticket.payment.BankTransfer;
+import ticket.payment.CreditCard;
 import ticket.service.ConcertHall;
+import ticket.utils.PayUtils;
 import ticket.utils.UserUtils;
 
 import java.util.ArrayList;
@@ -64,7 +68,30 @@ public class Main {
                     c=scanner.nextInt();
                     scanner.nextLine();
                     // hall.reserveSeat(row, col, name);
-                    hall.reserveSeat(r,c,UserUtils.UNametoRName(users,userNo));
+                    int price=hall.reserveSeat(r,c,UserUtils.UNametoRName(users,userNo));
+                    if(price<0){
+                        continue;
+                    }
+                    System.out.println("좌석 가격: " + price + "원");
+                    //결제 방법 선택
+                    System.out.print("결제 방법 선택 (1. 카드, 2. 계좌): ");
+                    int payOption = scanner.nextInt();
+                    scanner.nextLine();
+                    Payable payMethod = PayUtils.choosePayMethod(payOption);
+                    if(payMethod==null){
+                        System.out.println("잘못된 결제 방법입니다. 예약을 취소합니다.");
+                        hall.cancelSeat(r, c, UserUtils.UNametoRName(users, userNo));
+                        continue;
+                    }
+
+                    //실제 결제 진행
+                    boolean paid = payMethod.pay(users.get(userNo), price);
+                    if(!paid){
+                        //잔액 부족 -> 예약 취소
+                        hall.cancelSeat(r,c,UserUtils.UNametoRName(users,userNo));
+                        continue;
+                    }
+                    System.out.println("결제가 완료되었습니다.");
                     break;
                 case 3:
                     // 취소 로직

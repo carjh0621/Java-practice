@@ -47,19 +47,24 @@ public class ConcertHall {
         }
     }
 
-    public void reserveSeat(int r, int c, String name){
-        if(r>=row_n || r<0 || c>=col_n || c<0)
+    public int reserveSeat(int r, int c, String name){
+        if(r>=row_n || r<0 || c>=col_n || c<0) {
             System.out.println("out of index, reserve fail");
-        else if (seats[r][c].isBooked())
+            return -1;
+        }
+        else if (seats[r][c].isBooked()){
             System.out.println("this seat is already booked, reserve fail");
+            return -1;
+            }
         else{
             if(seats[r][c].book(name)) {
                 System.out.println("reserve success");
-                int price = seats[r][c].getPrice();
-                System.out.println("price: "+ price +"원");
+                return seats[r][c].getPrice();
             }
-            else
+            else {
                 System.out.println("reserve fail");
+                return -1;
+            }
         }
     }
 
