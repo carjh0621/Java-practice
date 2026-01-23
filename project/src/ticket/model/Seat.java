@@ -71,5 +71,15 @@ public class Seat implements Reservable {
     public String getInfo(){
         return getSymbol() + row + "행, " +col +"열";
     }
+
+    public String getReserverName(){
+        return  reserverName;
+    }
+    public int getRow(){
+        return row;
+    }
+    public int getCol(){
+        return col;
+    }
 }
 

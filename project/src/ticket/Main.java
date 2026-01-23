@@ -1,14 +1,17 @@
 package ticket;
 
 import ticket.interfaces.Payable;
+import ticket.model.Seat;
 import ticket.model.User;
 import ticket.payment.BankTransfer;
 import ticket.payment.CreditCard;
 import ticket.service.ConcertHall;
 import ticket.utils.PayUtils;
+import ticket.utils.UserManager;
 import ticket.utils.UserUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
 
@@ -22,38 +25,35 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         ConcertHall hall = new ConcertHall();
+        UserManager userManager = new UserManager();
         boolean isRun = true;
-
-        //User 생성
-        ArrayList<User> users = new ArrayList<>();
-        int nextID=0;
-        int initbalance;
-        String pwd;
 
         while (isRun){
             System.out.println("\n--- 예매 시스템 ---");
-            System.out.println("0.User 생성  1.홀 조회  2.좌석 예매  3.예매 취소  4.예매 조회  5.시스템 종료");
+            System.out.println("-100.관리자 모드 0.User 생성  1.홀 조회  2.좌석 예매  3.예매 취소  4.예매 조회  5.시스템 종료");
             System.out.print("입력: ");
             int menu = scanner.nextInt();
 
-            String name;
-            int r,c;
-            int userNo;
 
             switch (menu) {
                 case -100:
-                    //관리자 모드
+                    // 관리자 모드: 가격순/이름순으로 예약 좌석 출력
+                    System.out.println("1.가격순  2.이름순");
+                    int adminChoice = scanner.nextInt();
+                    List<Seat> reservedSeats = (adminChoice == 1)
+                            ? hall.getReservedSeatsSortedByPrice()
+                            : hall.getReservedSeatsSortedByName();
+                    hall.printReservedSeats(reservedSeats);
                     break;
                 case 0:
                     // 유저 생성
                     System.out.print("User 이름, pwd, 초기 자산 (name, pwd, initbalance): ");
-                    name=scanner.next();
-                    pwd=scanner.next();
-                    initbalance=scanner.nextInt();
+                    String name=scanner.next();
+                    String pwd=scanner.next();
+                    int initbalance=scanner.nextInt();
                     scanner.nextLine();
-                    User u=new User(name,nextID++,pwd,initbalance);
-                    users.add(u);
-                    System.out.println("your id,pwd is ("+(nextID-1)+", "+pwd+")");
+                    User u=userManager.addUser(name,pwd,initbalance);
+                    System.out.println("your id,pwd is ("+u.getUserID()+", "+pwd+")");
                     break;
                 case 1:
                     hall.showSeats(); // 전체 좌석 출력
@@ -61,19 +61,20 @@ public class Main {
                 case 2:
                     // 좌석 예매
                     System.out.print("본인의 유저 번호와 패스워드 입력 (user#, pwd): ");
-                    userNo=scanner.nextInt();
-                    pwd= scanner.next();
-                    if(!UserUtils.verifyUserwithPwd(users,userNo,pwd)){
-                        continue;
+                    int userNo=scanner.nextInt();
+                    String passwd= scanner.next();
+                    if(!userManager.verifyUser(userNo,passwd)){
+                        continue; // 인증 실패
                     }
                     System.out.print("예매할 좌석의 행, 열 입력 (row, column): ");
-                    r=scanner.nextInt();
-                    c=scanner.nextInt();
+                    int r=scanner.nextInt();
+                    int c=scanner.nextInt();
                     scanner.nextLine();
 
-                    int price=hall.reserveSeat(r,c,UserUtils.UNametoRName(users,userNo));
+                    String reservedName = UserUtils.UNametoRName(userManager.getUsers(), userNo);
+                    int price=hall.reserveSeat(r,c,reservedName);
                     if(price<0){
-                        continue;
+                        continue; //예약실패
                     }
                     System.out.println("좌석 가격: " + price + "원");
                     //결제 방법 선택
@@ -83,34 +84,40 @@ public class Main {
                     Payable payMethod = PayUtils.choosePayMethod(payOption);
                     if(payMethod==null){
                         System.out.println("잘못된 결제 방법입니다.");
-                        hall.cancelSeat(r, c, UserUtils.UNametoRName(users, userNo));
+                        hall.cancelSeat(r, c, reservedName);
                         continue;
                     }
 
                     //실제 결제 진행
-                    boolean paid = payMethod.pay(users.get(userNo), price);
+                    User reservingUser = userManager.findUserById(userNo);
+                    boolean paid = payMethod.pay(reservingUser, price);
                     if(!paid){
                         //잔액 부족 -> 예약 취소
-                        if(!hall.cancelSeat(r,c,UserUtils.UNametoRName(users,userNo)))
+                        if(!hall.cancelSeat(r,c,UserUtils.UNametoRName(userManager.getUsers(),userNo)))
                             continue;
                     }
-                    //System.out.println("결제가 완료되었습니다.");
+
                     break;
                 case 3:
                     // 취소 로직
                     System.out.print("본인의 유저 번호와 패스워드 입력 (user#, pwd): ");
                     userNo=scanner.nextInt();
-                    pwd= scanner.next();
-                    if(!UserUtils.verifyUserwithPwd(users,userNo,pwd)){
+                    passwd= scanner.next();
+                    if(!userManager.verifyUser(userNo,passwd)){
                         continue;
                     }
                     //본인의 예매 내역 출력
-                    hall.findSeat(UserUtils.UNametoRName(users,userNo));
+                    reservedName=UserUtils.UNametoRName(userManager.getUsers(),userNo);
+                    hall.findSeat(reservedName);
                     System.out.print("취소할 좌석의 행, 열 입력 (row, column): ");
                     r=scanner.nextInt();
                     c=scanner.nextInt();
                     scanner.nextLine();
-                    hall.cancelSeat(r,c,UserUtils.UNametoRName(users,userNo));
+                    if(!hall.cancelSeat(r,c,reservedName))
+                        continue;
+                    else{
+                        System.out.println("cancel succeed");
+                    }
                     break;
                 case 4:
                     // 예매 확인 로직
@@ -119,11 +126,11 @@ public class Main {
                     System.out.print("본인의 유저 번호와 패스워드 입력 (user#, pwd): ");
                     userNo=scanner.nextInt();
                     pwd= scanner.next();
-                    if(!UserUtils.verifyUserwithPwd(users,userNo,pwd)){
+                    if(!userManager.verifyUser(userNo,pwd)){
                         continue;
                     }
                     scanner.nextLine();
-                    hall.findSeat(UserUtils.UNametoRName(users,userNo));
+                    hall.findSeat(UserUtils.UNametoRName(userManager.getUsers(),userNo));
                     break;
                 case 5:
                     isRun = false; // 루프 종료

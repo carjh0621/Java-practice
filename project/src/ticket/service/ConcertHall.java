@@ -3,6 +3,9 @@ package ticket.service;
 
 import ticket.model.Seat;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 
 public class ConcertHall {
@@ -111,4 +114,49 @@ public class ConcertHall {
         return seats[r][c].getPrice();
     }
 
+    //  관리자 메서드
+    // 가격순으로 예약된 좌석 정렬
+    public List<Seat> getReservedSeatsSortedByPrice() {
+        List<Seat> reserved = new ArrayList<>();
+        for (int i = 0; i < row_n; i++) {
+            for (int j = 0; j < col_n; j++) {
+                Seat s = seats[i][j];
+                if (s.isBooked()) {
+                    reserved.add(s);
+                }
+            }
+        }
+        reserved.sort(Comparator.comparingInt(Seat::getPrice));
+        return reserved;
+    }
+
+    // 예약자 이름순으로 예약된 좌석 정렬
+    public List<Seat> getReservedSeatsSortedByName() {
+        List<Seat> reserved = new ArrayList<>();
+        for (int i = 0; i < row_n; i++) {
+            for (int j = 0; j < col_n; j++) {
+                Seat s = seats[i][j];
+                if (s.isBooked()) {
+                    reserved.add(s);
+                }
+            }
+        }
+        reserved.sort(Comparator
+                .comparing(Seat::getReserverName)
+                .thenComparingInt(Seat::getRow)
+                .thenComparingInt(Seat::getCol));
+        return reserved;
+    }
+
+    // 예약 좌석 리스트를 출력
+    public void printReservedSeats(List<Seat> seats) {
+        if (seats == null || seats.isEmpty()) {
+            System.out.println("예약된 좌석이 없습니다.");
+            return;
+        }
+        for (Seat s : seats) {
+            System.out.printf("예약자: %s / 좌표: (%d,%d) / 가격: %d원%n",
+                    s.getReserverName(), s.getRow(), s.getCol(), s.getPrice());
+        }
+    }
 }
