@@ -41,6 +41,9 @@ public class Main {
             int userNo;
 
             switch (menu) {
+                case -100:
+                    //관리자 모드
+                    break;
                 case 0:
                     // 유저 생성
                     System.out.print("User 이름, pwd, 초기 자산 (name, pwd, initbalance): ");
@@ -67,7 +70,7 @@ public class Main {
                     r=scanner.nextInt();
                     c=scanner.nextInt();
                     scanner.nextLine();
-                    // hall.reserveSeat(row, col, name);
+
                     int price=hall.reserveSeat(r,c,UserUtils.UNametoRName(users,userNo));
                     if(price<0){
                         continue;
@@ -79,7 +82,7 @@ public class Main {
                     scanner.nextLine();
                     Payable payMethod = PayUtils.choosePayMethod(payOption);
                     if(payMethod==null){
-                        System.out.println("잘못된 결제 방법입니다. 예약을 취소합니다.");
+                        System.out.println("잘못된 결제 방법입니다.");
                         hall.cancelSeat(r, c, UserUtils.UNametoRName(users, userNo));
                         continue;
                     }
@@ -88,10 +91,10 @@ public class Main {
                     boolean paid = payMethod.pay(users.get(userNo), price);
                     if(!paid){
                         //잔액 부족 -> 예약 취소
-                        hall.cancelSeat(r,c,UserUtils.UNametoRName(users,userNo));
-                        continue;
+                        if(!hall.cancelSeat(r,c,UserUtils.UNametoRName(users,userNo)))
+                            continue;
                     }
-                    System.out.println("결제가 완료되었습니다.");
+                    //System.out.println("결제가 완료되었습니다.");
                     break;
                 case 3:
                     // 취소 로직
@@ -111,12 +114,16 @@ public class Main {
                     break;
                 case 4:
                     // 예매 확인 로직
-                    // 본인 이름 입력 -> 이름, 좌석 좌표 출력
+                    // 본인 인증 -> 이름, 좌석 좌표 출력
                     // 없으면 예매 안했다 출력
-                    System.out.print("본인의 이름 입력 (name): ");
-                    name = scanner.next();
+                    System.out.print("본인의 유저 번호와 패스워드 입력 (user#, pwd): ");
+                    userNo=scanner.nextInt();
+                    pwd= scanner.next();
+                    if(!UserUtils.verifyUserwithPwd(users,userNo,pwd)){
+                        continue;
+                    }
                     scanner.nextLine();
-                    hall.findSeat(name);
+                    hall.findSeat(UserUtils.UNametoRName(users,userNo));
                     break;
                 case 5:
                     isRun = false; // 루프 종료

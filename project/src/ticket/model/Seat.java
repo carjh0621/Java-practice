@@ -42,10 +42,10 @@ public class Seat implements Reservable {
     @Override
     public int getPrice() {
         if(isVIP) {
-            return 10000;
+            return 20000;
         }
         else{
-            return 20000;
+            return 10000;
         }
     }
 

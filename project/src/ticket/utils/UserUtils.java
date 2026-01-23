@@ -13,7 +13,7 @@ public class UserUtils {
     }
 
     public static boolean verifyUserwithPwd(ArrayList<User> users, int userNo, String pwd){
-        if(userNo<=0 || userNo>= users.size()){
+        if(userNo<0 || userNo>= users.size()){
             System.out.println("error: user# is out of bound");
             return false;
         }

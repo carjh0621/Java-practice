@@ -58,7 +58,7 @@ public class ConcertHall {
             }
         else{
             if(seats[r][c].book(name)) {
-                System.out.println("reserve success");
+                //System.out.println("reserve success");
                 return seats[r][c].getPrice();
             }
             else {
@@ -68,19 +68,28 @@ public class ConcertHall {
         }
     }
 
-    public void cancelSeat(int r, int c, String name){
-        if(r>=row_n || r<0 || c>=col_n || c<0)
+    public boolean cancelSeat(int r, int c, String name){
+        if(r>=row_n || r<0 || c>=col_n || c<0) {
             System.out.println("out of index, cancel fail");
+            return false;
+        }
         else if (!seats[r][c].isBooked()) {
             System.out.println("this seat is not booked, cancel fail");
+            return false;
         }
         else{
-            if(seats[r][c].cancel(name)==1)
-                System.out.println("cancel success");
-            else if(seats[r][c].cancel(name)==-1)
+            if(seats[r][c].cancel(name)==1) {
+                //System.out.println("cancel success");
+                return true;
+            }
+            else if(seats[r][c].cancel(name)==-1) {
                 System.out.println("this seat is not booked, cancel fail");
-            else
+                return false;
+            }
+            else {
                 System.out.println("this seat is not booked by you. cancel fail");
+                return false;
+            }
         }
     }
 
@@ -98,6 +107,8 @@ public class ConcertHall {
             System.out.println("예매한 좌석 없음");
         }
     }
-
+    public int getSeatPrice(int r, int c){
+        return seats[r][c].getPrice();
+    }
 
 }
