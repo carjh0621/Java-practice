@@ -1,8 +1,11 @@
-package ticket.system;
+package ticket.service;
+
+
+import ticket.model.Seat;
 
 
 
-class ConcertHall {
+public class ConcertHall {
     int row_n=10, col_n=10;
     Seat[][] seats;
 
@@ -11,10 +14,10 @@ class ConcertHall {
         for (int i = 0; i < row_n; i++) {
             for (int j = 0; j < col_n; j++) {
                 if (i<2){
-                    seats[i][j] = new VIPSeat(); // 앞의 두 행은 vip 좌석
+                    seats[i][j] = new Seat(i,j,true); // 앞의 두 행은 vip 좌석
                 }
                 else {
-                    seats[i][j] = new Seat();    // 여기서 ticket.system.Seat 객체 생성
+                    seats[i][j] = new Seat(i,j,false);    // 여기서 ticket.system.model.Seat 객체 생성
                 }
             }
         }
@@ -50,7 +53,7 @@ class ConcertHall {
         else if (seats[r][c].isBooked())
             System.out.println("this seat is already booked, reserve fail");
         else{
-            if(seats[r][c].book(name)==1) {
+            if(seats[r][c].book(name)) {
                 System.out.println("reserve success");
                 int price = seats[r][c].getPrice();
                 System.out.println("price: "+ price +"원");
@@ -69,7 +72,7 @@ class ConcertHall {
         else{
             if(seats[r][c].cancel(name)==1)
                 System.out.println("cancel success");
-            else if(seats[r][c].cancel(name)==0)
+            else if(seats[r][c].cancel(name)==-1)
                 System.out.println("this seat is not booked, cancel fail");
             else
                 System.out.println("this seat is not booked by you. cancel fail");
@@ -90,4 +93,6 @@ class ConcertHall {
             System.out.println("예매한 좌석 없음");
         }
     }
+
+
 }
