@@ -1,6 +1,7 @@
 package ticket.service;
 
 
+import ticket.exception.*;
 import ticket.model.Seat;
 
 import java.util.ArrayList;
@@ -50,35 +51,30 @@ public class ConcertHall {
         }
     }
 
-    public int reserveSeat(int r, int c, String name){
+    public int reserveSeat(int r, int c, String name) throws ReservationException {
         if(r>=row_n || r<0 || c>=col_n || c<0) {
-            System.out.println("out of index, reserve fail");
-            return -1;
+            throw new InvalidSeatException("잘못된 좌석 좌표입니다: " + r + ", "+c);
         }
         else if (seats[r][c].isBooked()){
-            System.out.println("this seat is already booked, reserve fail");
-            return -1;
-            }
+            throw new AlreadyBookedException("이미 예약된 좌석입니다.");
+        }
         else{
             if(seats[r][c].book(name)) {
                 //System.out.println("reserve success");
                 return seats[r][c].getPrice();
             }
             else {
-                System.out.println("reserve fail");
-                return -1;
+                throw new ReservationException("예약 실패");
             }
         }
     }
 
-    public boolean cancelSeat(int r, int c, String name){
+    public boolean cancelSeat(int r, int c, String name) throws ReservationException{
         if(r>=row_n || r<0 || c>=col_n || c<0) {
-            System.out.println("out of index, cancel fail");
-            return false;
+            throw new InvalidSeatException("잘못된 좌석 좌표입니다: " + r + ", " + c);
         }
         else if (!seats[r][c].isBooked()) {
-            System.out.println("this seat is not booked, cancel fail");
-            return false;
+            throw new SeatNotBookedException("예매된 좌석이 아닙니다.");
         }
         else{
             if(seats[r][c].cancel(name)==1) {
@@ -86,12 +82,10 @@ public class ConcertHall {
                 return true;
             }
             else if(seats[r][c].cancel(name)==-1) {
-                System.out.println("this seat is not booked, cancel fail");
-                return false;
+                throw new SeatNotBookedException("예매된 좌석이 아닙니다.");
             }
             else {
-                System.out.println("this seat is not booked by you. cancel fail");
-                return false;
+                throw new NotMySeatException("본인이 예매한 좌석이 아닙니다.");
             }
         }
     }
