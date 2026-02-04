@@ -51,43 +51,20 @@ public class ConcertHall {
         }
     }
 
-    public int reserveSeat(int r, int c, String name) throws ReservationException {
+    public int reserveSeat(int r, int c, String name) throws SeatException {
         if(r>=row_n || r<0 || c>=col_n || c<0) {
             throw new InvalidSeatException("잘못된 좌석 좌표입니다: " + r + ", "+c);
         }
-        else if (seats[r][c].isBooked()){
-            throw new AlreadyBookedException("이미 예약된 좌석입니다.");
-        }
-        else{
-            if(seats[r][c].book(name)) {
-                //System.out.println("reserve success");
-                return seats[r][c].getPrice();
-            }
-            else {
-                throw new ReservationException("예약 실패");
-            }
-        }
+        seats[r][c].book(name);
+        return seats[r][c].getPrice();
     }
 
-    public boolean cancelSeat(int r, int c, String name) throws ReservationException{
+    public int cancelSeat(int r, int c, String name) throws SeatException{
         if(r>=row_n || r<0 || c>=col_n || c<0) {
             throw new InvalidSeatException("잘못된 좌석 좌표입니다: " + r + ", " + c);
         }
-        else if (!seats[r][c].isBooked()) {
-            throw new SeatNotBookedException("예매된 좌석이 아닙니다.");
-        }
-        else{
-            if(seats[r][c].cancel(name)==1) {
-                //System.out.println("cancel success");
-                return true;
-            }
-            else if(seats[r][c].cancel(name)==-1) {
-                throw new SeatNotBookedException("예매된 좌석이 아닙니다.");
-            }
-            else {
-                throw new NotMySeatException("본인이 예매한 좌석이 아닙니다.");
-            }
-        }
+        seats[r][c].cancel(name);
+        return seats[r][c].getPrice();
     }
 
     public void findSeat(String name){

@@ -1,5 +1,8 @@
 package ticket.model;
 
+import ticket.exception.InsufficientBalanceException;
+import ticket.exception.PaymentException;
+
 public class Account {
     private int balance;
 
@@ -11,19 +14,15 @@ public class Account {
         this.balance = initMoney;
     }
 
-    public boolean deposit(int amount) {
-        if (amount <= 0) return false;
+    public void deposit(int amount) {
         balance += amount;
-        return true;
     }
 
-    public boolean withdrawal(int amount) {
-        if (amount <= 0) return false;
-        if (balance >= amount) {
-            balance -= amount;
-            return true;
+    public void withdrawal(int amount) throws PaymentException {
+        if(balance < amount){
+            throw new InsufficientBalanceException("잔액이 부족합니다. (잔액: " + balance + "원)");
         }
-        return false;
+        balance -= amount;
     }
 
     public int getBalance() {

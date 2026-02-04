@@ -1,18 +1,20 @@
 package ticket;
 
+import ticket.exception.InsufficientBalanceException;
+import ticket.exception.PaymentException;
+
+import ticket.exception.SeatException;
 import ticket.interfaces.Payable;
 import ticket.model.Seat;
 import ticket.model.User;
-import ticket.payment.BankTransfer;
-import ticket.payment.CreditCard;
+
 import ticket.service.ConcertHall;
 import ticket.utils.PayUtils;
 import ticket.utils.UserManager;
 import ticket.utils.UserUtils;
 
-import java.util.ArrayList;
+
 import java.util.List;
-import java.util.Locale;
 import java.util.Scanner;
 
 
@@ -23,10 +25,17 @@ public class Main {
 
 
     public static void main(String[] args) {
+        // 세팅
         Scanner scanner = new Scanner(System.in);
         ConcertHall hall = new ConcertHall();
         UserManager userManager = new UserManager();
-        boolean isRun = true;
+        boolean isRun = true; //시스템 작동 중인지
+        // 관련 변수들
+        int r=0, c=0; //좌석 좌표
+        String reservedName = null; //예약자 이름
+        String name = null;
+        String pwd = null;
+        int userNo=0;
 
         while (isRun){
             System.out.println("\n--- 예매 시스템 ---");
@@ -48,8 +57,8 @@ public class Main {
                 case 0:
                     // 유저 생성
                     System.out.print("User 이름, pwd, 초기 자산 (name, pwd, initbalance): ");
-                    String name=scanner.next();
-                    String pwd=scanner.next();
+                    name=scanner.next();
+                    pwd=scanner.next();
                     int initbalance=scanner.nextInt();
                     scanner.nextLine();
                     User u=userManager.addUser(name,pwd,initbalance);
@@ -60,64 +69,85 @@ public class Main {
                     break;
                 case 2:
                     // 좌석 예매
-                    System.out.print("본인의 유저 번호와 패스워드 입력 (user#, pwd): ");
-                    int userNo=scanner.nextInt();
-                    String passwd= scanner.next();
-                    if(!userManager.verifyUser(userNo,passwd)){
-                        continue; // 인증 실패
-                    }
-                    System.out.print("예매할 좌석의 행, 열 입력 (row, column): ");
-                    int r=scanner.nextInt();
-                    int c=scanner.nextInt();
-                    scanner.nextLine();
+                    try{
+                        //1. 인증
+                        System.out.print("본인의 유저 번호와 패스워드 입력 (user#, pwd): ");
+                        userNo=scanner.nextInt();
+                        pwd = scanner.next();
+                        if (!userManager.verifyUser(userNo, pwd)) {
+                            continue; // 인증 실패
+                        }
+                        //2. 좌석 예매
+                        System.out.print("예매할 좌석의 행, 열 입력 (row, column): ");
+                        r = scanner.nextInt();
+                        c = scanner.nextInt();
+                        scanner.nextLine();
+                        reservedName = UserUtils.UNametoRName(userManager.getUsers(), userNo);
+                        int price = hall.reserveSeat(r, c, reservedName);
+                        System.out.println("좌석 가격: " + price + "원");
+                        //3. 결제 방법 선택
+                        System.out.print("결제 방법 선택 (1. 카드, 2. 계좌): ");
+                        int payOption = scanner.nextInt();
+                        scanner.nextLine();
+                        Payable payMethod = PayUtils.choosePayMethod(payOption);
 
-                    String reservedName = UserUtils.UNametoRName(userManager.getUsers(), userNo);
-                    int price=hall.reserveSeat(r,c,reservedName);
-                    if(price<0){
-                        continue; //예약실패
-                    }
-                    System.out.println("좌석 가격: " + price + "원");
-                    //결제 방법 선택
-                    System.out.print("결제 방법 선택 (1. 카드, 2. 계좌): ");
-                    int payOption = scanner.nextInt();
-                    scanner.nextLine();
-                    Payable payMethod = PayUtils.choosePayMethod(payOption);
-                    if(payMethod==null){
-                        System.out.println("잘못된 결제 방법입니다.");
-                        hall.cancelSeat(r, c, reservedName);
-                        continue;
-                    }
+                        //4. 결제 진행
+                        User reservingUser = userManager.findUserById(userNo);
+                        payMethod.pay(reservingUser, price);
 
-                    //실제 결제 진행
-                    User reservingUser = userManager.findUserById(userNo);
-                    boolean paid = payMethod.pay(reservingUser, price);
-                    if(!paid){
-                        //잔액 부족 -> 예약 취소
-                        if(!hall.cancelSeat(r,c,UserUtils.UNametoRName(userManager.getUsers(),userNo)))
-                            continue;
+                        //완료
+                        System.out.println("예매가 완료되었습니다.");
                     }
-
+                    catch (SeatException e){
+                        System.out.println("예매 실패: " + e.getMessage());
+                    }
+                    catch (InsufficientBalanceException e){
+                        System.out.println("결제 실패:" + e.getMessage());
+                        System.out.println("-> 예매를 취소합니다.");
+                        try {
+                            int price=hall.cancelSeat(r, c, reservedName);
+                        } catch (Exception ex) {
+                            System.err.println("좌석 취소 실패: " + ex.getMessage());
+                        }
+                    }
+                    catch (PaymentException e){
+                        System.out.println("결제 실패:" + e.getMessage());
+                    }
+                    catch (Exception e) {
+                        // 그 외 예상치 못한 에러
+                        System.out.println("시스템 오류: " + e.getMessage());
+                    }
                     break;
                 case 3:
                     // 취소 로직
-                    System.out.print("본인의 유저 번호와 패스워드 입력 (user#, pwd): ");
-                    userNo=scanner.nextInt();
-                    passwd= scanner.next();
-                    if(!userManager.verifyUser(userNo,passwd)){
-                        continue;
+                    try{
+                        // 1. 본인 인증
+                        System.out.print("본인의 유저 번호와 패스워드 입력 (user#, pwd): ");
+                        userNo=scanner.nextInt();
+                        pwd= scanner.next();
+                        if(!userManager.verifyUser(userNo,pwd)){
+                            continue;
+                        }
+                        //2. 본인의 예매 내역 출력
+                        reservedName=UserUtils.UNametoRName(userManager.getUsers(),userNo);
+                        hall.findSeat(reservedName);
+                        // 3. 취소할 좌석 선택
+                        System.out.print("취소할 좌석의 행, 열 입력 (row, column): ");
+                        r=scanner.nextInt();
+                        c=scanner.nextInt();
+                        scanner.nextLine();
+                        // 4. 취소
+                        int refundAmount=hall.cancelSeat(r,c,reservedName);
+                        // 5. 환불
+                        User currentUser = userManager.findUserById(userNo);
+                        currentUser.deposit(refundAmount);
+                        // 완료
+                        System.out.println("취소 성공: " + refundAmount +"원이 환불되었습니다.");
                     }
-                    //본인의 예매 내역 출력
-                    reservedName=UserUtils.UNametoRName(userManager.getUsers(),userNo);
-                    hall.findSeat(reservedName);
-                    System.out.print("취소할 좌석의 행, 열 입력 (row, column): ");
-                    r=scanner.nextInt();
-                    c=scanner.nextInt();
-                    scanner.nextLine();
-                    if(!hall.cancelSeat(r,c,reservedName))
-                        continue;
-                    else{
-                        System.out.println("cancel succeed");
+                    catch (SeatException e){
+                        System.out.println("취소 실패: "+e.getMessage());
                     }
+
                     break;
                 case 4:
                     // 예매 확인 로직

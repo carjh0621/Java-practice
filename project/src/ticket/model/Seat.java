@@ -1,6 +1,9 @@
 package ticket.model;
 
 
+import ticket.exception.AlreadyBookedException;
+import ticket.exception.NotMySeatException;
+import ticket.exception.SeatNotBookedException;
 import ticket.interfaces.Reservable;
 
 public class Seat implements Reservable {
@@ -20,20 +23,24 @@ public class Seat implements Reservable {
     //특정 좌석에 대해서 예매를 하는것
     //n x m 좌석 배열 중 한 좌석에 대한 예매
     @Override
-    public boolean book(String name){
-        if (this.isBooked) return false;
-        this.reserverName=name;
+    public void book(String name) throws AlreadyBookedException {
+        if (this.isBooked) {
+            throw new AlreadyBookedException("이미 예약된 좌석입니다.");
+        }
         this.isBooked=true;
-        return true; //예매 성공
+        this.reserverName=name;
     }
 
-    public int cancel(String name){
-        if (!this.isBooked) return -1;
-        if (!this.reserverName.equals(name)) return 0;
+    public void cancel(String name) throws SeatNotBookedException, NotMySeatException {
+        if (!this.isBooked) {
+            throw new SeatNotBookedException("예매된 좌석이 아닙니다.");
+        }
+        if (!this.reserverName.equals(name)){
+            throw new NotMySeatException("본인이 예매한 좌석이 아닙니다.");
+        }
         else{
             this.reserverName="";
             this.isBooked=false;
-            return 1;
         }
     }
 

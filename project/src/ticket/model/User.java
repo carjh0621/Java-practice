@@ -1,5 +1,8 @@
 package ticket.model;
 
+import ticket.exception.InsufficientBalanceException;
+import ticket.exception.PaymentException;
+
 import java.util.ArrayList;
 
 public class User {
@@ -21,12 +24,13 @@ public class User {
         return this.UserID;
     }
 
-    public boolean deposit(int amount){
-        return account.deposit(amount);
+    public void deposit(int amount){
+        assert amount>0; //음수 금액 입력 방지
+        account.deposit(amount);
     }
 
-    public boolean pay(int amount){
-        return account.withdrawal(amount);
+    public void pay(int amount) throws PaymentException{
+        account.withdrawal(amount);
     }
 
     public int getBalance(){
