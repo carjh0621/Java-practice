@@ -2,7 +2,7 @@ package ticket.service;
 
 
 import ticket.exception.*;
-import ticket.model.Seat;
+import ticket.domain.Seat;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -59,6 +59,19 @@ public class ConcertHall {
         return seats[r][c].getPrice();
     }
 
+    // 실제 상태를 변경하지 않고, 권한과 상태만 먼저 체크
+    public void checkSeatOwner(int r, int c, String name) throws SeatException {
+        if(r >= row_n || r < 0 || c >= col_n || c < 0) {
+            throw new InvalidSeatException("잘못된 좌석 좌표입니다: " + r + ", " + c);
+        }
+        if(!seats[r][c].isBooked()) {
+            throw new SeatNotBookedException("예매된 좌석이 아닙니다.");
+        }
+        if(!seats[r][c].getReserverName().equals(name)) {
+            throw new NotMySeatException("본인이 예매한 좌석이 아닙니다.");
+        }
+    }
+
     public int cancelSeat(int r, int c, String name) throws SeatException{
         if(r>=row_n || r<0 || c>=col_n || c<0) {
             throw new InvalidSeatException("잘못된 좌석 좌표입니다: " + r + ", " + c);
@@ -67,20 +80,7 @@ public class ConcertHall {
         return seats[r][c].getPrice();
     }
 
-    public void findSeat(String name){
-        int count=0;
-        for(int i=0;i<row_n;i++){
-            for(int j=0;j<col_n;j++){
-                if(seats[i][j].bookperson(name)) {
-                    count++;
-                    System.out.printf("%d번째 좌석 좌표(row,col): (%d,%d)\n", count, i, j);
-                }
-            }
-        }
-        if(count==0){
-            System.out.println("예매한 좌석 없음");
-        }
-    }
+
     public int getSeatPrice(int r, int c){
         return seats[r][c].getPrice();
     }

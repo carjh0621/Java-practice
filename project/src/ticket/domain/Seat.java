@@ -1,4 +1,4 @@
-package ticket.model;
+package ticket.domain;
 
 
 import ticket.exception.AlreadyBookedException;
@@ -44,8 +44,6 @@ public class Seat implements Reservable {
         }
     }
 
-
-
     @Override
     public int getPrice() {
         if(isVIP) {
@@ -59,10 +57,6 @@ public class Seat implements Reservable {
     @Override
     public boolean isBooked(){
         return isBooked;
-    }
-
-    public boolean bookperson(String name){
-        return this.reserverName.equals(name);
     }
 
     public String getSymbol(){
